@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+        layout:decorate="~{system/base/layout}">
+<head>
+
+</head>
+<div layout:fragment="content">
+   <h4 id="lineDaaaa" th:text="${lineData}" hidden="hidden"></h4>
+   <h4 id="pieDaaaa" th:text="${pieData}" hidden="hidden"></h4>
+    <div class="two-chart">
+        <div id="line" style="width: 50%;height:400px;"></div>
+        <div id="pie-chart" style="width: 50%;height: 400px;"></div>
+    </div>
+    <script th:src="@{/js/echarts.min.js}"></script>
+    <script th:inline="javascript">
+        var myLine = echarts.init(document.getElementById('line'));
+        manageLine();
+        var myPie = echarts.init(document.getElementById('pie-chart'));
+        managePie();
+        // 设置折线图
+        function manageLine(){
+            var lineX=document.getElementById('lineDaaaa').textContent;
+            var lineXone=[];
+            var lineXtwo=[];
+            lineX=lineX.replace('{','');
+            lineX=lineX.replace('}','');
+            lineX=lineX.split(',');
+            for(var i=0;i<lineX.length;i++){
+                lineXone.push(parseInt(lineX[i].split('=')[1]));
+                lineXtwo.push(lineX[i].split('=')[0]);
+            }
+            var optionLine = {
+                title: {
+                    text: '预定人数统计'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['酒店预定人数']
+                },
+                xAxis: {
+                    type: 'category',
+                    data:lineXtwo
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [{
+                    name: '酒店预定人数',
+                    type: 'line',
+                    data: lineXone
+                }]
+            };
+            myLine.setOption(optionLine);
+        }
+        function managePie(){
+            var pieX=document.getElementById('pieDaaaa').textContent;
+            var pie=[];
+
+            var pieNames=[];
+            pieX=pieX.replace('{','');
+            pieX=pieX.replace('}','');
+            pieX=pieX.split(',');
+
+            for(var i=0;i<pieX.length;i++){
+                var pieOne={};
+                pieOne.value=parseInt(pieX[i].split('=')[1]);
+                pieOne.name=pieX[i].split('=')[0];
+                pieNames.push(pieX[i].split('=')[0]);
+                pie.push(pieOne);
+            }
+            var pieData = pie;
+            var pieOption = {
+                title: {
+                    text: '预定酒店数据统计',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 10,
+                    data: pieNames
+                },
+                series: [
+                    {
+                        name: '访问来源',
+                        type: 'pie',
+                        radius: '50%',
+                        center: ['50%', '60%'],
+                        data: pieData,
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        },
+                        itemStyle: {
+                            emphasis: {
+                                shadowBlur: 20,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ]
+            };
+            myPie.setOption(pieOption);
+        }
+
+    </script>
+</div>
+
+</html>

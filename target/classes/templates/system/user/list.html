@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+        layout:decorate="~{system/base/layout}">
+<div layout:fragment="content">
+
+    <div class="container" style="width: 1400px">
+        <h1>用户管理</h1>
+        <div class="row clearfix">
+            <form name="search-form" class="form-inline m-b-10 clearfix" th:action="@{/system/userListUI}"
+                  id="search-form">
+            </form>
+
+            <div class="col-md-12 column">
+                <table class="table table-hover table-condensed">
+                    <thead>
+                    <tr>
+<!--                        <th width="150px">id</th>-->
+                        <th width="100px">用户名</th>
+                        <th width="100px">password</th>
+                        <th width="100px">姓名</th>
+                        <th width="150px">邮箱</th>
+                        <th width="50px">性别</th>
+                        <th width="50px">学历</th>
+                        <th width="100px">电话</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="user:${page.content}">
+<!--                        <td th:text="${user.id}"></td>-->
+                        <td th:text="${user.username}"></td>
+                        <td th:text="${user.password}"></td>
+                        <td th:text="${user.name}"></td>
+                        <td th:text="${user.email}"></td>
+                        <td th:text="${user.gender}"></td>
+                        <td th:text="${user.xueli}"></td>
+                        <td th:text="${user.phone}"></td>
+                        <td>
+                            <div align="left" style="float:left">
+                                <button type="button" th:onclick="updatePassword([[${user.id}]])" class="btn btn-default btn-info">重置密码</button>
+                                <button type="button" th:onclick="updateProfile([[${user.id}]])" class="btn btn-default btn-info">编辑</button>
+                                <button type="button" th:onclick=" deleteUser([[${user.id}]])" class="btn btn-default btn-warning">删除</button>
+                            </div>
+
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div th:insert="~{base/pageable}"></div>
+        <!--弹框-->
+        <div class="modal fade" id="exampleModal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="exampleModalLabel"></h4>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" name="insertPassword"
+                              id="insertPassword" class="form-horizontal">
+                            <!--隐藏的-->
+                            <input type="text" id="editId" name="id" hidden>
+                            <div class="form-group m-b-10" style="text-align:right">
+                                <label class="col-sm-4 control-label">
+                                    <label style="color: red">*</label>密码:</label>
+                                <div class="col-sm-7">
+                                    <input type="text" class="form-control" id="password" name="password">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">返回</button>
+                        <button type="button" class="btn btn-info" onclick="saveForm()">提交</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+<!--用户管理编辑-->
+        <div class="modal fade " id="editPro">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="proModalLabel"></h4>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" name="insertPassword"
+                              id="edInfo" class="form-horizontal">
+                            <!--隐藏的-->
+                            <input type="text" id="edid" name="id" hidden>
+                            <div class="form-group m-b-10" style="text-align:right">
+                                <label class="col-sm-4 control-label">
+                                    <label style="color: red">*</label>用户名:</label>
+                                <div class="col-sm-7">
+                                    <input type="text" class="form-control" id="eduserName" name="username">
+                                </div>
+                                <label class="col-sm-4 control-label">
+                                    <label style="color: red">*</label>性别:</label>
+                                <div class="col-sm-7">
+                                    <input type="text" class="form-control" id="gender" name="gender">
+                                </div>
+                                <label class="col-sm-4 control-label">
+                                    <label style="color: red">*</label>电话:</label>
+                                <div class="col-sm-7">
+                                    <input type="text" class="form-control" id="phone" name="phone">
+                                </div>
+                                <label class="col-sm-4 control-label">
+                                    <label style="color: red">*</label>邮箱:</label>
+                                <div class="col-sm-7">
+                                    <input type="text" class="form-control" id="email" name="email">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">返回</button>
+                        <button type="button" class="btn btn-info" onclick="saveDe()">提交</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+
+<!--重置密码-->
+        function updatePassword(id) {
+            $.ajax({
+                url: '/travel/system/getUserById',
+                data: {"id": id},
+                type: 'post',
+                dataType: 'json',
+                success: function (result) {
+                    if (result.code == 200) {
+                        var user = result.data;
+                        //全部清空
+                        $('#exampleModalLabel').text('修改密码');
+                        //id
+                        $('#id').val(user.id);
+                        //username
+                        $('#username').val(user.username);
+                        //password
+                        $('#password').val(user.password);
+                        //name
+                        $('#name').val(user.name);
+                        //显示模态框
+                        $('#exampleModal').modal('show')
+                    }
+                }
+            });
+        }
+
+        function updateProfile(id){
+            $.ajax({
+                url: '/travel/system/getUserById',
+                data: {"id": id},
+                type: 'post',
+                dataType: 'json',
+                success: function (result) {
+                    if (result.code == 200) {
+                        var user = result.data;
+                        //全部清空
+                        $('#proModalLabel').text('修改用户资料');
+                        $('#edid').val(user.id);
+                        $('#eduserName').val(user.username);
+                        $('#gender').val(user.gender);
+                        $('#email').val(user.email);
+                        $('#phone').val(user.phone);
+                        $('#editPro').modal('show')
+                    }
+                }
+            });
+        }
+        function deleteUser(id){
+        $.ajax({
+            url: '/travel/system/sysDel',
+            data: {"id": id.toString()},
+            type: 'post',
+            dataType: 'json',
+            success: function (result) {
+                if (result.code == 200) {
+                    layer.open({
+                        title:'',
+                        content:'删除成功'
+                    })
+                }
+                else {
+                    layer.open({
+                        title:'删除失败',
+                        content:'请移除用户的相关信息再进行用户删除'
+                    })
+                }
+            }
+        })
+        }
+        // 保存个人信息
+        function saveDe(){
+        $.ajax({
+            url:'/travel/system/sysSave',
+            data:$('#edInfo').serialize(),
+            type:'post',
+            dataType:'json',
+            success:function (result){
+                if (result.code === 200) {
+                    window.location.href = "/travel/system/userListUI";
+                } else {
+                    layer.open({
+                        title: '错误提示',
+                        content: result.message
+                    });
+                }
+            }
+        });
+        }
+
+        function saveForm() {
+            //password
+            var password = $('#password').val();
+
+            if ($.trim(password) === '') {
+                layer.msg("密码不能为空");
+                return;
+            }
+
+            $.ajax({
+                url: '/travel/system/saveUser',
+                data: $("#insertPassword").serialize(),
+                type: 'post',
+                dataType: 'json',
+                success: function (result) {
+                    if (result.code === 200) {
+                        window.location.href = "/travel/system/userListUI";
+                    } else {
+                        layer.open({
+                            title: '错误提示',
+                            content: result.message
+                        });
+                    }
+                }
+            })
+        }
+
+    </script>
+</div>
+</html>

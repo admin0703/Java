@@ -1,0 +1,58 @@
+#resetPw{
+    border: 1px solid black;
+    width: 40%;
+    position: relative;
+    left: 50%;
+    translate: -50%;
+    text-align: center;
+    font-size: 20px;
+    margin: 5px;
+}
+#resetPw input{
+    margin: 10px;
+    font-size: 20px;
+    border-radius:5px ;
+}
+#resetPw button{
+    width: 80px;
+    height: 30px;
+    font-size: 15px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+}
+#wrapperReset{
+    border: 1px solid black;
+    width: 40%;
+    position: relative;
+    left: 50%;
+    translate: -50%;
+    text-align: center;
+    font-size: 20px;
+    margin: 5px;
+}
+#wrapperReset input{
+    margin: 10px;
+    font-size: 20px;
+    border-radius:5px ;
+}
+#wrapperReset button{
+    width: 100px;
+    height: 30px;
+    font-size: 15px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+}
+.two-chart{
+    left: 0;
+    top: 0;
+    height: 400px;
+}
+#line{
+    min-width: 600px;
+}
+#pie-chart{
+    position: relative;
+    left: 50%;
+    top: -400px;
+    min-width: 400px
+}

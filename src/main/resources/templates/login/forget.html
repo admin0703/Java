@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+        layout:decorate="~{base/layout}">
+<div layout:fragment="content">
+    <p id="mmmail" hidden="hidden"></p>
+    <div id="wrapperReset">
+        <h1>邮箱验证</h1>
+        <form >
+            <label for="email">邮箱：</label>
+            <input type="email" id="email" name="email" required>
+            <button type="button" id="send-btn">发送验证码</button>
+        </form>
+        <form action="" id="form2">
+            <label for="ckCode">验证：</label>
+            <input type="text" id="ckCode" name="ckCode" required>
+            <button type="button" id="check">校验验证码</button>
+        </form>
+        <div id="message"></div>
+    </div>
+    <div id="resetPw" style="display: none">
+        <form>
+            密&emsp;&emsp;码:<input type="text" placeholder="请输入密码" name="realPw" id="realPw">
+            <br/>
+            确认密码:<input type="password" placeholder="请确认密码" name="agaPw" id="agaPw">
+            <br/>
+            <button id="resetPwww" >提交</button>
+        </form>
+
+    </div>
+    <script>
+<!--        发送验证码-->
+        const form = document.querySelector("form");
+        const emailInput = document.getElementById("email");
+        const sendButton = document.getElementById("send-btn");
+        const messageDiv = document.getElementById("message");
+        sendButton.addEventListener("click", function(event) {
+            event.preventDefault();
+            const email = emailInput.value;
+            if (!validateEmail(email)) {
+                showMessage("请输入有效的邮箱地址");
+                return;
+            }
+            // 发送验证码的后端接口
+            fetch("/travel/sendEmail", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body:
+                JSON.stringify({'email':email})
+            })
+                .then(response => {
+                    if (response.ok) {
+                        showMessage("验证码已发送，请注意查收");
+                    } else {
+                        showMessage("发送验证码失败，请稍后再试");
+                    }
+                })
+                .catch(error => {
+                    showMessage("发送验证码失败，请稍后再试");
+                    console.error(error);
+                    console.log(email);
+                });
+        });
+        function validateEmail(email) {
+            const emailRegex = /^\S+@\S+\.\S+$/;
+            return emailRegex.test(email);
+        }
+        function showMessage(message) {
+            messageDiv.textContent = message;
+        }
+    //     校验验证码
+
+        const codeInput=document.getElementById("ckCode");
+        const ckBtn=document.getElementById("check");
+        ckBtn.onclick=function (){
+            $.ajax({
+                url: '/travel/ckCode',
+                data: {ckCode: codeInput.value,
+                        email:emailInput.value
+                },
+                type: 'post',
+                dataType: 'json',
+                success: function (result) {
+                    if (result.code === 200) {
+                        alert('验证码校验成功...正跳转重置密码');
+                        $("#mmmail").text(result.message);
+                        $('#wrapperReset').css("display","none");
+                        $('#resetPw').css("display","block");
+                    } else {
+                        layer.open({
+                            title: '错误提示',
+                            content: result.message
+                        });
+                    }
+                }
+            })
+        };
+        // 重置密码
+        const rest=document.getElementById("resetPwww");
+        rest.onclick=function (){
+            var str1=document.getElementById("realPw").value;
+            var str3=document.getElementById("agaPw").value;
+            var str2=document.getElementById("mmmail").innerText;
+            if(str1===""||str3===""){
+                layer.alert("请输入空白处");
+            }
+            else if(str1!==str3){
+                layer.alert("两次输入不一致")
+            }
+           else {
+                $.ajax({
+                    url: '/travel/resPw',
+                    data: {
+                        realPw: str1,
+                        email: str2
+                    },
+                    type: 'post',
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result.code === 200) {
+                            alert('密码修改成功!');
+
+                        } else {
+                            layer.open({
+                                title: '错误提示',
+                                content: result.message
+                            });
+                        }
+                    }
+                })
+            }
+        };
+    </script>
+</div>
+</html>
